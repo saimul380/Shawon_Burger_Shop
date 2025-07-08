@@ -2,12 +2,25 @@ require('dotenv').config();
 const { Pool } = require('pg');
 
 // PostgreSQL connection configuration
+const connectionConfig = process.env.DATABASE_URL ?
+  {
+    // Use the connection string from Render/Heroku/etc.
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false
+    }
+  } :
+  {
+    // Use individual variables for local development
+    user: process.env.PGUSER,
+    host: process.env.PGHOST,
+    database: process.env.PGDATABASE,
+    password: process.env.PGPASSWORD,
+    port: process.env.PGPORT,
+  };
+
 const pool = new Pool({
-    user: process.env.PGUSER || 'postgres',
-    host: process.env.PGHOST || 'localhost',
-    database: 'shawon_burger_shop',
-    password: process.env.PGPASSWORD || 'postgres',
-    port: parseInt(process.env.PGPORT || '5432'),
+    ...connectionConfig,
     max: 20, // Maximum number of clients in the pool
     idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
     connectionTimeoutMillis: 2000, // How long to wait before timing out when connecting a new client
