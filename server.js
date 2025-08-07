@@ -1,9 +1,10 @@
-require('dotenv').config();
 const express = require('express');
-
 const cors = require('cors');
 const path = require('path');
 const compression = require('compression');
+
+// Load environment variables
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 // Start with just loading the Express app
 const app = express();
@@ -13,6 +14,9 @@ app.use(cors());
 app.use(compression());
 app.use(express.json());
 app.use(express.static(__dirname));
+
+// Set port
+const PORT = process.env.PORT || 3002;  // Using 3002 to avoid conflicts
 
 // Create temp directory
 const fs = require('fs');
@@ -152,13 +156,13 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
 
 server.on('error', (err) => {
     console.error('Server startup error:', err);
+    process.exit(1);
 });
 
 
