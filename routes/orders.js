@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/order.pg.js');
-const { auth, admin } = require('../middleware/auth');
+const { auth, isAdmin: admin } = require('../middleware/auth');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Create new order
