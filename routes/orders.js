@@ -168,11 +168,10 @@ router.put('/:id/status', auth, admin, async (req, res) => {
 
         // If order is cancelled, update cancelled_at
         if (status === 'cancelled') {
-            order.cancelled_at = new Date();
-            order.cancelled_by = userId;
+            updatedOrder.cancelled_at = new Date();
+            updatedOrder.cancelled_by = userId;
+            await updatedOrder.save();
         }
-
-        await order.save();
 
         res.json({
             success: true,
