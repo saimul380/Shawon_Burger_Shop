@@ -38,13 +38,14 @@ CREATE TABLE menu_items (
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
-    total_amount DECIMAL(10,2) NOT NULL,
-    delivery_fee DECIMAL(10,2) NOT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL,
     delivery_address TEXT NOT NULL,
-    payment_method VARCHAR(20) CHECK (payment_method IN ('card', 'bkash', 'nagad', 'rocket')),
-    payment_status VARCHAR(20) DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed')),
-    order_status VARCHAR(20) DEFAULT 'pending' CHECK (order_status IN ('pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled')),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    customer_name VARCHAR(100) NOT NULL,
+    customer_phone VARCHAR(20) NOT NULL,
+    special_instructions TEXT,
+    payment_method VARCHAR(50) NOT NULL,
+    status VARCHAR(50) DEFAULT 'Pending' NOT NULL, -- e.g., Pending, Confirmed, Delivered, Cancelled
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create Order Items table (for items in each order)

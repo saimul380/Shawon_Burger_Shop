@@ -16,6 +16,7 @@ router.get('/orders', auth, isAdmin, async (req, res) => {
         const orders = await Order.findAll(); // You will need to create this method in your Order model
         res.json(orders);
     } catch (error) {
+        console.error('Failed to fetch orders:', error);
         res.status(500).json({ error: 'Failed to fetch orders.' });
     }
 });
@@ -34,6 +35,53 @@ router.patch('/orders/:id/status', auth, isAdmin, async (req, res) => {
     }
 });
 
+
+// Get dashboard statistics
+router.get('/statistics', auth, isAdmin, async (req, res) => {
+    try {
+        // Get total orders count
+        const totalOrders = await Order.count();
+        
+        // Get total revenue (sum of all completed orders)
+        const revenueResult = await Order.sequelize.query(
+            `SELECT COALESCE(SUM(total_amount), 0) as total 
+             FROM orders 
+             WHERE status = 'delivered' AND payment_status = 'completed'`,
+            { type: Order.sequelize.QueryTypes.SELECT }
+        );
+        const totalRevenue = parseFloat(revenueResult[0]?.total || 0);
+        
+        // Get pending orders count
+        const pendingOrders = await Order.count({
+            where: {
+                status: 'pending'
+            }
+        });
+        
+        // Get delivered orders count
+        const deliveredOrders = await Order.count({
+            where: {
+                status: 'delivered'
+            }
+        });
+        
+        res.json({
+            success: true,
+            totalOrders,
+            totalRevenue,
+            pendingOrders,
+            deliveredOrders
+        });
+        
+    } catch (error) {
+        console.error('Error fetching statistics:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch statistics',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
 
 // Get dashboard statistics with date range
 router.get('/dashboard', auth, isAdmin, async (req, res) => {

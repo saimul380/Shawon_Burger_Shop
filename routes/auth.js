@@ -37,6 +37,7 @@ router.post('/register', async (req, res) => {
         });
 
     } catch (error) {
+        console.error('Registration error:', error);
         // Diagnostic: Return the full error to the client to understand the root cause
         res.status(500).json({
             error: 'Server error during registration.',
@@ -100,6 +101,28 @@ router.get('/profile', auth, async (req, res) => {
         }
     } catch (error) {
         res.status(400).json({ error: error.message });
+    }
+});
+
+// Verify token
+router.get('/verify', auth, (req, res) => {
+    try {
+        // If we got here, the token is valid (auth middleware passed)
+        res.json({
+            success: true,
+            user: {
+                id: req.user.id,
+                name: req.user.name,
+                email: req.user.email,
+                role: req.user.role
+            }
+        });
+    } catch (error) {
+        console.error('Token verification error:', error);
+        res.status(401).json({ 
+            success: false, 
+            error: 'Invalid or expired token' 
+        });
     }
 });
 

@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initWebSocket();
 
     // Helper Functions
-    async function showAdminPanel() {
+    function showAdminPanel() {
         console.log('Showing admin panel');
         document.getElementById('loginContainer').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'block';
@@ -58,17 +58,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         // Load initial data
-        try {
-            await window.loadOrders();
-            // Commenting out other functions that might not be implemented yet
-            // loadDashboardData();
-            // loadMenuItems();
-            // loadComboDeals();
-            // loadReviews();
-        } catch (error) {
-            console.error('Error loading dashboard data:', error);
-            showMessage('Failed to load dashboard data: ' + error.message, 'danger');
-        }
+        loadDashboardData();
+        loadOrders();
+        loadMenuItems();
+        loadComboDeals();
+        loadReviews();
     }
 
     function showLoginForm() {
@@ -161,155 +155,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.removeItem('adminUser');
         showLoginForm();
         showMessage('You have been logged out.', 'info');
-    }
-
-// Move loadOrders to global scope
-window.loadOrders = async function() {
-        console.log('Loading orders...');
-        const token = localStorage.getItem('adminToken');
-        const ordersContainer = document.getElementById('ordersContainer');
-        
-        if (!token) {
-            showMessage('Please log in to view orders', 'warning');
-            return;
-        }
-
-        if (!ordersContainer) {
-            console.error('Orders container not found');
-            return;
-        }
-
-        // Show loading state
-        ordersContainer.innerHTML = `
-            <div class="text-center my-4">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading orders...</span>
-                </div>
-                <p class="mt-2">Loading orders...</p>
-            </div>`;
-
-        try {
-            const response = await fetch('/api/admin/orders', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to load orders: ${response.status}`);
-            }
-
-            const orders = await response.json();
-            console.log('Orders loaded:', orders);
-            
-            if (!Array.isArray(orders)) {
-                throw new Error('Invalid orders data received');
-            }
-
-            if (orders.length === 0) {
-                ordersContainer.innerHTML = '<div class="alert alert-info">No orders found.</div>';
-                return;
-            }
-
-            // Create table for orders
-            let tableHtml = `
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Phone</th>
-                                <th>Items</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Payment</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            // Add each order to the table
-            orders.forEach(order => {
-                const orderDate = new Date(order.created_at || Date.now()).toLocaleString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                const statusClass = {
-                    'pending': 'warning',
-                    'processing': 'info',
-                    'completed': 'success',
-                    'cancelled': 'danger'
-                }[order.status?.toLowerCase()] || 'secondary';
-
-                // Format items list
-                const itemsList = order.items?.map(item => 
-                    `${item.quantity}x ${item.name} ($${item.price})`
-                ).join('<br>') || 'No items';
-
-                tableHtml += `
-                    <tr>
-                        <td>#${order.id}</td>
-                        <td>${order.customer_name || 'N/A'}</td>
-                        <td>${order.customer_phone || 'N/A'}</td>
-                        <td>${itemsList}</td>
-                        <td>$${parseFloat(order.total_amount || 0).toFixed(2)}</td>
-                        <td>
-                            <span class="badge bg-${statusClass}">
-                                ${order.status || 'pending'}
-                            </span>
-                        </td>
-                        <td>${orderDate}</td>
-                        <td>${order.payment_method?.toUpperCase() || 'N/A'}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary view-order" data-order-id="${order.id}">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            tableHtml += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-
-            ordersContainer.innerHTML = tableHtml;
-            
-            // Add event listeners to view order buttons
-            document.querySelectorAll('.view-order').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const orderId = e.target.closest('button').dataset.orderId;
-                    viewOrderDetails(orderId);
-                });
-            });
-
-        } catch (error) {
-            console.error('Error loading orders:', error);
-            const ordersContainer = document.getElementById('ordersContainer');
-            if (ordersContainer) {
-                ordersContainer.innerHTML = `
-                    <div class="alert alert-danger">
-                        Failed to load orders: ${error.message}
-                    </div>
-                `;
-            }
-        }
-    }
-
-    async function viewOrderDetails(orderId) {
-        console.log('Viewing order details for:', orderId);
-        // Implement order details modal or page
-        alert(`Viewing order #${orderId}. This feature will be implemented next.`);
     }
 
     // Add print styles

@@ -30,19 +30,20 @@
                     <li class="nav-item"><a class="nav-link" href="#reviews">Reviews</a></li>
                 </ul>
                 <div id="authSection" class="d-flex">
-                    <!-- Show when logged out -->
-                    <div id="loggedOutButtons">
+                    <!-- Buttons shown when user is logged out -->
+                    <div id="loggedOutButtons" class="d-flex">
                         <a href="user-auth.html" class="btn btn-outline-light me-2">Login</a>
                         <a href="user-auth.html" class="btn btn-light">Sign Up</a>
                     </div>
-                    <!-- Show when logged in -->
-                                        <div id="loggedInButtons" class="d-flex align-items-center" style="display: none;">
-                        <span class="text-light me-3" id="userGreeting"></span>
+
+                    <!-- Buttons shown when user is logged in -->
+                    <div id="loggedInButtons" class="d-flex align-items-center d-none">
+                        <span id="userGreeting" class="text-light me-3"></span>
                         <button type="button" class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#orderModal">
                             <i class="fas fa-shopping-cart"></i> Cart
-                            <span class="badge bg-danger ms-1" id="cart-badge">0</span>
+                            <span id="cart-badge" class="badge bg-danger ms-1">0</span>
                         </button>
-                        <button class="btn btn-outline-light" id="logoutBtn">Logout</button>
+                        <button id="logoutBtn" class="btn btn-outline-light">Logout</button>
                     </div>
                 </div>
             </div>

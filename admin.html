@@ -87,28 +87,39 @@
         
         <!-- Admin Panel -->
         <div id="adminPanel" style="display: none;">
-            <div class="row">
-                <div class="col-md-12 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h3>Welcome, <span id="adminName">Admin</span>!</h3>
-                            <p>You are logged in as an administrator. You can manage orders, menus, and user accounts here.</p>
-                        </div>
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="mt-4">Admin Dashboard</h1>
+                    <div class="text-end">
+                        <p class="mb-0">Welcome, <span id="adminName">Admin</span></p>
                     </div>
                 </div>
-                
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Recent Orders</h5>
+                <p>Welcome to the admin dashboard. Here you can manage orders, users, and menu items.</p>
+
+                <!-- Orders Section -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-table me-1"></i>
+                            Recent Orders
                         </div>
-                        <div class="card-body">
-                            <div id="ordersContainer">
-                                <p>Loading orders...</p>
+                        <button class="btn btn-sm btn-primary" onclick="loadOrders()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="ordersContainer">
+                            <div class="text-center my-4">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading orders...</span>
+                                </div>
+                                <p class="mt-2">Loading orders...</p>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="row">
                 
                 <div class="col-md-6 mb-4">
                     <div class="card">
@@ -175,6 +186,7 @@
 
     <!-- Bootstrap JS and custom scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="admin.js"></script>
+    <!-- Load the new admin script -->
+    <script src="admin-new.js"></script>
 </body>
 </html>

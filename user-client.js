@@ -26,17 +26,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const userGreeting = document.getElementById('userGreeting');
         
         if (token && userData.name) {
-            // User is logged in
-            if (loggedInButtons) loggedInButtons.style.display = 'flex';
-            if (loggedOutButtons) loggedOutButtons.style.display = 'none';
+            // User is logged in: show logged-in buttons, hide logged-out buttons
+            if (loggedInButtons) {
+                loggedInButtons.classList.remove('d-none');
+                loggedInButtons.classList.add('d-flex');
+            }
+            if (loggedOutButtons) {
+                loggedOutButtons.classList.add('d-none');
+                loggedOutButtons.classList.remove('d-flex');
+            }
             if (userGreeting) userGreeting.textContent = `Hello, ${userData.name}`;
-            
-            // Make authenticated API calls possible with Authorization header
+
+            // Make authenticated API calls possible
             setupAuthenticatedAxios(token);
         } else {
-            // User is logged out
-            if (loggedInButtons) loggedInButtons.style.display = 'none';
-            if (loggedOutButtons) loggedOutButtons.style.display = 'flex';
+            // User is logged out: hide logged-in buttons, show logged-out buttons
+            if (loggedInButtons) {
+                loggedInButtons.classList.add('d-none');
+                loggedInButtons.classList.remove('d-flex');
+            }
+            if (loggedOutButtons) {
+                loggedOutButtons.classList.remove('d-none');
+                loggedOutButtons.classList.add('d-flex');
+            }
         }
     }
     

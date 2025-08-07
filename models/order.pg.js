@@ -1,8 +1,8 @@
 const { pool } = require('../db/config');
 
 const Order = {
-    async create(orderData) {
-        const { userId, items, totalAmount, deliveryAddress, paymentMethod, customerName, customerPhone, specialInstructions } = orderData;
+    async create(userId, orderData) {
+        const { items, totalAmount, deliveryAddress, paymentMethod, customerName, customerPhone, specialInstructions } = orderData;
         const client = await pool.connect();
 
         try {
@@ -10,15 +10,23 @@ const Order = {
 
             const orderRes = await client.query(
                 `INSERT INTO orders (user_id, total_amount, delivery_address, payment_method, customer_name, customer_phone, special_instructions, status)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, 'Pending')
-                 RETURNING id`,
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, 'Pending') RETURNING id`,
                 [userId, totalAmount, deliveryAddress, paymentMethod, customerName, customerPhone, specialInstructions]
             );
             const newOrderId = orderRes.rows[0].id;
 
-            const itemInsertQuery = `INSERT INTO order_items (order_id, name, quantity, price) VALUES ($1, $2, $3, $4)`;
+            // Fetch menu_item_id for each item by name and insert into order_items
             for (const item of items) {
-                await client.query(itemInsertQuery, [newOrderId, item.name, item.quantity, item.price]);
+                const menuItemRes = await client.query('SELECT id FROM menu_items WHERE LOWER(name) = LOWER($1)', [item.name]);
+                if (menuItemRes.rows.length === 0) {
+                    throw new Error(`Menu item "${item.name}" not found.`);
+                }
+                const menuItemId = menuItemRes.rows[0].id;
+
+                await client.query(
+                    `INSERT INTO order_items (order_id, menu_item_id, quantity, unit_price) VALUES ($1, $2, $3, $4)`,
+                    [newOrderId, menuItemId, item.quantity, item.price]
+                );
             }
 
             await client.query('COMMIT');
@@ -37,12 +45,13 @@ const Order = {
             SELECT 
                 o.*, 
                 json_agg(json_build_object(
-                    'name', oi.name, 
+                    'name', mi.name, 
                     'quantity', oi.quantity, 
-                    'price', oi.price
+                    'price', oi.unit_price
                 )) as items
             FROM orders o
             LEFT JOIN order_items oi ON o.id = oi.order_id
+            LEFT JOIN menu_items mi on oi.menu_item_id = mi.id
             GROUP BY o.id
             ORDER BY o.created_at DESC
         `);
@@ -75,7 +84,7 @@ const Order = {
 
     async updateStatus(orderId, status) {
         const result = await pool.query(
-            'UPDATE orders SET order_status = $1 WHERE id = $2 RETURNING *',
+            'UPDATE orders SET status = $1 WHERE id = $2 RETURNING *',
             [status, orderId]
         );
         return result.rows[0];
